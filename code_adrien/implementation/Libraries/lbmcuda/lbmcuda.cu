@@ -358,12 +358,14 @@ void lbm_lattices_cuda_dealloc(lbm_lattices* lat) {
 }
 
 void lbm_u_alloc(lbm_u* u, size_t nl) {
+    printf("Allocating u->u0 with malloc\n");
     u->u0 = (double*) malloc( sizeof(double)*nl );
     u->u1 = (double*) malloc( sizeof(double)*nl );
     u->u2 = (double*) malloc( sizeof(double)*nl );
 }
 
 void lbm_u_cuda_alloc(lbm_u* u, size_t nl) {
+    printf("Allocating u->u0 with cudaMalloc\n");
     HANDLE_ERROR(cudaMalloc(&u->u0, sizeof(double)*nl ));
     HANDLE_ERROR(cudaMalloc(&u->u1, sizeof(double)*nl ));
     HANDLE_ERROR(cudaMalloc(&u->u2, sizeof(double)*nl ));
@@ -376,6 +378,8 @@ void lbm_u_dealloc(lbm_u* u) {
 }
 
 void lbm_u_cuda_dealloc(lbm_u* u) {
+    printf("Value of u pointer : %p\n", u);
+    printf("Value of u->u0 pointer : %p\n", u->u0);
     HANDLE_ERROR(cudaFree(u->u0));
     HANDLE_ERROR(cudaFree(u->u1));
     HANDLE_ERROR(cudaFree(u->u2));
@@ -443,6 +447,7 @@ lbm_simulation* lbm_simulation_create(size_t nx, size_t ny, size_t nz, double om
 
 void lbm_simulation_destroy(lbm_simulation* lbm_sim)
 {
+    printf("lbm_simulation_destroy lnmcuda.cu\n");
     lbm_vars_cuda_dealloc(&lbm_sim->d_vars);
     HANDLE_ERROR(cudaFree(lbm_sim->d_pal_lat));
     free(lbm_sim);
