@@ -37,11 +37,11 @@ usePOSIX     = true
 # Path to external source files (other than Palabos)
 srcPaths =
 # Path to external libraries (other than Palabos)
-libraryPaths =
+libraryPaths =../../../../../Libraries/lbmcuda/
 # Path to inlude directories (other than Palabos)
-includePaths =
+includePaths =../../../../../Libraries/lbmcuda/
 # Dynamic and static libraries (other than Palabos)
-libraries    =
+libraries    =lbmcuda
 
 # Compiler to use without MPI parallelism
 serialCXX    = g++

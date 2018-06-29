@@ -151,10 +151,16 @@ SparseBlockStructure3D createCavityDistribution3D(
 
 MultiBlockLattice3D<T, DESCRIPTOR> palabos_create_lattice(IncomprFlowParam<T> parameters, plint snx, plint sny, plint snz)
 {
+
+    fprintf(stderr, "\npalabos_create_lattice\n");
+    
     // Here the 5x5x5 cover-up is instantiated.
     plint numBlocksX = 3;
     plint numBlocksY = 3;
     plint numBlocksZ = 3;
+    // plint numBlocksX = 4;
+    // plint numBlocksY = 4;
+    // plint numBlocksZ = 4;
     plint numBlocks = numBlocksX*numBlocksY*numBlocksZ;
     plint envelopeWidth = 1;
     SparseBlockStructure3D blockStructure (
@@ -170,10 +176,13 @@ MultiBlockLattice3D<T, DESCRIPTOR> palabos_create_lattice(IncomprFlowParam<T> pa
     std::vector<std::pair<plint,plint> > ranges;
     plint numRanges = std::min(numBlocks, (plint)global::mpi().getSize());
     util::linearRepartition(0, numBlocks-1, numRanges, ranges);
+
+    fprintf(stderr, "Range size : %lu", ranges.size());
+
     for (pluint iProc=0; iProc<ranges.size(); ++iProc) {
         for (plint blockId=ranges[iProc].first; blockId<=ranges[iProc].second; ++blockId) {
             threadAttribution -> addBlock(blockId, iProc);
-            printf("Block %lu is run by processor %lu\n", blockId, iProc);
+            fprintf(stderr, "Block %lu is run by processor %lu\n", blockId, iProc);
         }
     }
 
@@ -218,27 +227,92 @@ int main(int argc, char * argv[])
     // Read arguments
     while (optind < argc) {
         switch (getopt(argc, argv, "pfFi:I:o:O:lLtTx:y:z:N:eb")) {
-            case 'p': { out = OUT_IMG; break; }
+            case 'p': { 
+                // OUT_NONE, OUT_FIN, OUT_FINP, OUT_IMG
+                out = OUT_IMG; 
+                fprintf(stderr, "p, out = OUT_IMG\n");
+                break; 
+            }
 //            case 'f': { out = OUT_FIN; break; }
-            case 'F': { out = OUT_FINP; break; }
-            case 'i': { max_iter = strtol(optarg, NULL, 10); break; }
-            case 'I': { out_interval = strtol(optarg, NULL, 10); break; }
-            case 'o': { out_path = optarg; break; }
-            case 'O': { out_pref = optarg; break; }
-            case 'l': { print_lups = true; break; }
-            case 'L': { print_avg_lups = true; break; }
-            case 't': { print_time = true; break; }
-            case 'T': { print_total_time = true; break; }
-            case 'x': { width  = strtol(optarg, NULL, 10); break; }
-            case 'y': { height = strtol(optarg, NULL, 10); break; }
-            case 'z': { depth  = strtol(optarg, NULL, 10); break; }
-            case 'N': { domain_size = strtol(optarg, NULL, 10); break; }
-            case 'e': { print_avg_energy = true; break; }
-            case 'b': { copy_boundaries_only = true; break; }
+            case 'F': { 
+                out = OUT_FINP; 
+                fprintf(stderr, "F, out = OUT_FINP\n");
+                break; 
+            }
+            case 'i': { 
+                max_iter = strtol(optarg, NULL, 10); 
+                fprintf(stderr, "i, max_iter = %ld\n", max_iter);    
+                break; 
+            }
+            case 'I': { 
+                out_interval = strtol(optarg, NULL, 10); 
+                fprintf(stderr, "I, out_interval = %ld\n", out_interval); 
+                break; 
+            }
+            case 'o': { 
+                out_path = optarg; 
+                fprintf(stderr, "o, out_path = %s\n", out_path.c_str()); 
+                break; 
+            }
+            case 'O': { 
+                out_pref = optarg; 
+                fprintf(stderr, "O, out_pref = %s\n", out_pref.c_str()); 
+                break; 
+            }
+            case 'l': { 
+                print_lups = true; 
+                fprintf(stderr, "l, print_lups = true\n"); 
+                break; 
+            }
+            case 'L': { 
+                print_avg_lups = true; 
+                fprintf(stderr, "L, print_avg_lups = true\n"); 
+                break; 
+            }
+            case 't': { 
+                print_time = true; 
+                fprintf(stderr, "t, print_time = true\n"); 
+                break; 
+            }
+            case 'T': { 
+                print_total_time = true; 
+                fprintf(stderr, "t, print_total_time = true\n"); 
+                break; 
+            }
+            case 'x': { 
+                width  = strtol(optarg, NULL, 10); 
+                fprintf(stderr, "x, width = %ld\n", width); 
+                break; 
+            }
+            case 'y': { 
+                height = strtol(optarg, NULL, 10); 
+                fprintf(stderr, "y, height = %ld\n", width); 
+                break; 
+            }
+            case 'z': { 
+                depth  = strtol(optarg, NULL, 10); 
+                fprintf(stderr, "z, depth = %ld\n", width); 
+                break; 
+            }
+            case 'N': { 
+                domain_size = strtol(optarg, NULL, 10); 
+                fprintf(stderr, "N, domain_size = %ld\n", domain_size); 
+                break; 
+            }
+            case 'e': { 
+                print_avg_energy = true; 
+                fprintf(stderr, "e, print_avg_energy = true\n"); 
+                break; 
+            }
+            case 'b': { 
+                copy_boundaries_only = true; 
+                fprintf(stderr, "b, copy_boundaries_only = true\n"); 
+                break; 
+                }
             default : { goto usage; }
         }
     }
-    
+
     // check that execution mode is set (output images or fin values)
     if (max_iter < 1 || width <= 0 || height <= 0 || depth <= 0 || width > domain_size || height > domain_size || depth > domain_size) {
     usage:
@@ -265,6 +339,12 @@ int main(int argc, char * argv[])
    
     plbInit(&argc, &argv);
     global::directories().setOutputDir(out_path + "/");
+
+    //fprintf(stderr, "Number of processors %i\n", global::mpi().getSize());
+    
+    //int size;
+    //MPI_Comm_size(MPI_COMM_WORLD, &size);
+    //fprintf(stderr, "Number of processors %i\n", size);
 
     IncomprFlowParam<T> parameters(
             (T) 1e-4,  // uMax

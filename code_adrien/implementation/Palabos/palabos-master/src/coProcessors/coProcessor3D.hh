@@ -120,6 +120,7 @@ namespace plb {
     D3Q19CudaCoProcessor3D<T>::~D3Q19CudaCoProcessor3D()
     {
         if (lbm_sim) {
+            printf("lbm_simulation_destroy in destructor\n");
             lbm_simulation_destroy(lbm_sim);
         }
 
@@ -136,13 +137,18 @@ namespace plb {
         this->nl = nx * ny * nz;
 
         if (lbm_sim) {
+            printf("lbm_simulation_destroy in addDomain\n");
             lbm_simulation_destroy(lbm_sim);
         }
+
+        // create simulation and allocate on gpu ?
         lbm_sim = lbm_simulation_create(nx, ny, nz, omega);
         
         if (lattices) {
             lbm_lattices_destroy(lattices);
         }
+        
+        // allocate on cpu ?
         lattices = lbm_lattices_create(nl);
 
         cns_done = false;
